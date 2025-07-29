@@ -27,7 +27,7 @@ mrc_BDR <- fread(paste0(dir, "BDR_Phenotype/MRC_BDR_Individual_Library.csv"), da
 ## ---------- selecting list of samples from Oxford and Newcastle cohort -----------------
 
 # filtering for samples in Oxford and Newcastle cohort 
-mrc_BDR_criteria <- mrc_BDR %>% filter(Institute %in% c("Oxford","Newcastle"), BraakStage %in% c(0,1,6), Sex == "female")
+mrc_BDR_criteria <- mrc_BDR %>% filter(Institute %in% c("Oxford","Newcastle"), BraakStage %in% c(0,1,6))
 colnames(mrc_BDR_criteria)[14] <- "PMI_hours"
 
 # samples that passed ATAC QC and DNAm QC
@@ -37,7 +37,7 @@ samplesPassedATACQC <- unique(passATAC[passATAC$PASSALL == TRUE, "Individual_ID"
 samplesPassedDNAm <- unique(passDNAm[passDNAm$passQCS3 == TRUE, "Individual_ID"])
 
 # select samples for stereo-seq
-samplesForSpatial <- weight_samples %>% filter(Institute %in% c("Oxford","Newcastle"), BraakStage %in% c(0,1,6), Sex == "female") %>% 
+samplesForSpatial <- weight_samples %>% filter(Institute %in% c("Oxford","Newcastle"), BraakStage %in% c(0,1,6)) %>% 
   mutate(passedATAC = ifelse(ExeterID %in% samplesPassedATACQC, TRUE, FALSE),
                              passedDNAm = ifelse(ExeterID %in% samplesPassedDNAm, TRUE, FALSE)) %>% 
   mutate(passedATAC = ifelse(ExeterID %in% passATAC$Individual_ID, passedATAC, NA),
@@ -46,8 +46,8 @@ samplesForSpatial <- weight_samples %>% filter(Institute %in% c("Oxford","Newcas
   merge(.,mrc_BDR_criteria[,c("ExeterID","PMI_hours","PATHDIAG")], by = "ExeterID") %>% 
   arrange(PMI_hours)
 
-message("All female samples, Braak stage 0,1,6:", nrow(samplesForSpatial))
-message("All female samples, Braak stage 0,1,6 passed QC:", nrow(samplesForSpatial %>% filter(passedDNAm == TRUE, passedATAC == TRUE)))
+message("All samples, Braak stage 0,1,6:", nrow(samplesForSpatial))
+message("All samples, Braak stage 0,1,6 passed QC:", nrow(samplesForSpatial %>% filter(passedDNAm == TRUE, passedATAC == TRUE)))
 
 # output
 write.csv(samplesForSpatial, paste0(dir, "Samples_Selected_RIN/samplesForSpatial.csv"), quote = F, row.names = F)
@@ -76,3 +76,17 @@ SecondRoundRIN <- BDR_demo[BDR_demo$Individual_ID %in%
 
 # output
 write.csv(SecondRoundRIN, paste0(dir, "Samples_Selected_RIN/samplesForSpatial_2ndRoundRIN.csv"),quote = F, row.names = F)
+
+
+## ---------- selecting for additional samples for new chips -----------------
+samplesSelectedForRin <- c(samplesSelectedForRin, c("EX087","EX060","EX088","EX035","EX047","EX102","EX058","EX047",
+                                                    "EX102","EX087","EX039","EX090"))
+
+# list of additional samples
+ThirdRoundRIN <- BDR_demo[BDR_demo$Individual_ID %in% 
+                             samplesforSpatial$ExeterID,c("Individual_ID","Institute","BraakStage","Gender","PMD","APOE")] %>% distinct(.) %>% 
+  arrange(PMD) %>% filter(!Individual_ID %in% samplesSelectedForRin) %>% 
+  filter(BraakStage %in% c(0,1,6)) %>% 
+  merge(., weight_samples[,c("ExeterID","Mass..mg.")], by.x = "Individual_ID", by.y = "ExeterID", all.x = T)
+
+write.csv(ThirdRoundRIN, paste0(dir, "Samples_Selected_RIN/samplesForSpatial_3rdRoundRIN.csv"),quote = F, row.names = F)
