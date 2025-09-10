@@ -1,0 +1,96 @@
+# Output name and relevant info
+export NAME=StereoSeqTraining
+
+# if multiplexing was performed
+export MULTIPLEXING=FALSE
+
+# if perform demultiplexing
+export DEMULTIPLEX=FALSE
+export DEMULTIPLEX_DIR=NA
+export DEMULTIPLEX_SOFTWARE=NA
+
+# raw fastq files that need to be merged
+export MERGE_FASTQ=TRUE
+
+# sequencing mode: <targeted> <whole>
+export SEQUENCING=whole
+
+## Output root directory filepath (ensure path exists)
+export SCRIPT_ROOT=/lustre/projects/Research_Project-MRC148213/lsl693/scripts/LRPipeline/ont_cDNA
+export WKD_ROOT=/lustre/projects/Research_Project-MRC190311/longReadSeq/ONTRNA/spatial/mouse_analysis
+export META_ROOT=/lustre/projects/Research_Project-MRC190311/longReadSeq/ONTRNA/spatial/mouse_analysis/0_metadata
+
+
+## SKLeung scripts
+export LOGEN_ROOT=/lustre/projects/Research_Project-MRC148213/lsl693/scripts/LOGen
+export PATH=$PATH:${LOGEN_ROOT}/miscellaneous
+export PATH=$PATH:${LOGEN_ROOT}/assist_ont_processing
+SUBSETPOLYTAILS=$LOGEN_ROOT/assist_ont_processing/subset_polyA_polyT.py
+
+
+## ---------------------------
+
+## Reference data filepaths 
+export GENOME_FASTA=/lustre/projects/Research_Project-MRC148213/lsl693/references/mouse/mm10.fa
+export GENOME_GTF=/lustre/projects/Research_Project-MRC148213/lsl693/references/annotation/gencode.vM22.annotation.gtf
+
+## ---------------------------
+
+# number of total samples (across all flow cells)
+export numSamples=2
+
+## ONT raw data
+# sequentially specify paths of raw fastq files from multiple flow cells
+export RAW_ROOT_DIR=(
+/lustre/projects/Research_Project-MRC190311/longReadSeq/ONTRNA/spatial/Stereo_seq_mouse/fastq_pass/ 
+/lustre/projects/Research_Project-MRC190311/longReadSeq/ONTRNA/spatial/Stereo_seq_mouse_TSO/fastq_pass/
+)
+
+# export barcode (if multiplexing=TRUE) <barcode number> <sample name>
+BARCODE_CONFIG=${META_ROOT}/mouseBarcode.csv
+export ALL_SAMPLES_NAMES=($(awk -F "\"*,\"*" '{print $1}' ${BARCODE_CONFIG}))
+cat $BARCODE_CONFIG
+
+# manifest QC
+manifest=${META_ROOT}/manifestQC.csv
+
+# ERCC
+ERCC_WKD_ROOT=NA
+
+## --------------------------
+
+# filtering expression
+export nreads=10
+export nsamples=2
+
+# CPAT input files
+export HEXAMER=/lustre/projects/Research_Project-MRC148213/lsl693/references/CPAT/Mouse_Hexamer.tsv
+export LOGITMODEL=/lustre/projects/Research_Project-MRC148213/lsl693/references/CPAT/Mouse_logitModel.RData
+
+## ---------------------------
+
+## Software 
+export SOFTDIR=/lustre/projects/Research_Project-MRC148213/lsl693/software
+
+export MINIONQC=${SOFTDIR}/minion_qc/MinIONQC.R
+# to run Porechop, require gcc-version 4.9.1 or more; 
+# on Knight: git clone https://github.com/rrwick/Porechop.git; cd Porechop; make
+# transfer whole Porechop folder from Knight to ISCA, and chmod 
+export PORECHOP=${SOFTDIR}/Porechop/porechop-runner.py
+export TCLEAN=${SOFTDIR}/TranscriptClean/TranscriptClean.py
+export CUPCAKE=${SOFTDIR}/cDNA_Cupcake
+export ANNOTATION=$CUPCAKE/annotation
+export SEQUENCE=$CUPCAKE/sequence
+export PYTHONPATH=$PYTHONPATH:$SEQUENCE
+export SQANTI3_DIR=${SOFTDIR}/SQANTI3
+export SQANTI_JSON=/lustre/projects/Research_Project-MRC190311/scripts/sequencing/longReadseq/SQANTI3-5.1/SQANTI3-5.1/utilities/filter/filter_adapted.json
+
+## ---------------------------
+
+## Software input files
+# SQANTI3 input files
+CAGE_PEAK=$SQANTI3_DIR/data/ref_TSS_annotation/mouse.refTSS_v3.1.GRCm39.bed
+POLYA=$SQANTI3_DIR/data/polyA_motifs/mouse_and_human.polyA_motif.txt
+
+
+## ---------------------------
